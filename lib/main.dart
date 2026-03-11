@@ -25,20 +25,14 @@ class MyBalanceApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Balance',
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(fontFamily: 'Inter', scaffoldBackgroundColor: const Color(0xFFF8FAFC), useMaterial3: true),
       home: const DashboardScreen(),
     );
   }
 }
 
-// --- Dashboard ---
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
-
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
@@ -69,8 +63,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final data = await _db.query('trans', orderBy: 'date DESC');
     double inc = 0, exp = 0;
     for (var item in data) {
-      if (item['type'] == 'income') inc += item['amount'];
-      else exp += item['amount'];
+      final amt = (item['amount'] as num).toDouble(); // এই লাইনটি এরর ফিক্স করেছে
+      if (item['type'] == 'income') {
+        inc += amt;
+      } else {
+        exp += amt;
+      }
     }
     setState(() {
       _transactions = data;
@@ -86,12 +84,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (user == null) return;
       final client = (await _googleSignIn.authenticatedClient())!;
       final driveApi = drive.DriveApi(client);
-      
       final content = jsonEncode(_transactions);
       final bytes = utf8.encode(content);
       final media = drive.Media(Stream.value(bytes), bytes.length);
       final file = drive.File()..name = "MyBalance_Backup_${DateTime.now().millisecondsSinceEpoch}.json";
-      
       await driveApi.files.create(file, uploadMedia: media);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("ড্রাইভ ব্যাকআপ সফল!")));
     } catch (e) {
