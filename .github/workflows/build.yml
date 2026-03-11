@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Hishab Kitab APK
 
 on:
   push:
@@ -21,18 +21,27 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      # এখানে প্রজেক্টের নাম ছোট হাতের 'acc' নির্দিষ্ট করে দেওয়া হয়েছে
-      - name: Create Missing Files
-        run: flutter create --project-name=acc --platforms android .
+      # নতুন প্যাকেজ নাম দিয়ে প্রজেক্ট রি-কনফিগার করা
+      - name: Create Flutter Project
+        run: |
+          flutter create --project-name=hishab_kitab --org=com.hishabkitab --platforms android .
 
-      - name: Get Packages
+      # অ্যান্ড্রয়েড ৮.১ এর জন্য কম্প্যাটিবিলিটি এবং প্যাকেজ আইডি ফিক্স
+      - name: Configure Android Manifest and SDK
+        run: |
+          sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
+          sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
+          sed -i 's/applicationId .*/applicationId "com.hishabkitab.app"/' android/app/build.gradle
+
+      - name: Get Dependencies
         run: flutter pub get
 
+      # এপিকে বিল্ড করা
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: My-Final-App
+          name: Hishab-Kitab-Final
           path: build/app/outputs/flutter-apk/app-release.apk
