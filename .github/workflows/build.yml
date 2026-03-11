@@ -1,4 +1,4 @@
-name: Build Hishab Kitab Debug APK
+name: Build Acc Release APK
 
 on:
   push:
@@ -26,32 +26,30 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      # প্যাকেজ নাম এবং অ্যাপ নাম সেট করা
-      - name: Create Missing Files
+      - name: Create Project Files
         run: |
-          flutter create --project-name=hishab_kitab --org=com.hishabkitab --platforms android .
+          flutter create --project-name=acc --org=com.example --platforms android .
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
           sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
-          sed -i 's/applicationId .*/applicationId "com.hishabkitab.app"/' android/app/build.gradle
+          sed -i 's/applicationId .*/applicationId "com.example.acc"/' android/app/build.gradle
 
-      # ফাইলগুলো রিপোজিটরিতে সেভ করা
-      - name: Save Files to Repository
+      - name: Save Files to Repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Save Android files for Debug Build" || echo "No changes"
+          git commit -m "Configure Release Build for Acc" || echo "No changes"
           git push
 
-      - name: Get Dependencies
+      - name: Get Packages
         run: flutter pub get
 
-      # এখানে 'debug' বিল্ড কমান্ড ব্যবহার করা হয়েছে
-      - name: Build Debug APK
-        run: flutter build apk --debug
+      # রিলিজ বিল্ড কমান্ড (বিনা সিগনেচারে)
+      - name: Build Release APK
+        run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Upload Debug APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Hishab-Kitab-Debug
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: Acc-Release-Unsigned
+          path: build/app/outputs/flutter-apk/app-release.apk
