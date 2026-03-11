@@ -21,8 +21,9 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
+      # এখানে প্রজেক্টের নাম ছোট হাতের 'acc' নির্দিষ্ট করে দেওয়া হয়েছে
       - name: Create Missing Files
-        run: flutter create . --platforms android
+        run: flutter create --project-name=acc --platforms android .
 
       - name: Get Packages
         run: flutter pub get
