@@ -1,14 +1,20 @@
-name: Build Hishab Kitab APK
+name: Setup and Build Hishab Kitab
 
 on:
   push:
     branches: [ main ]
+
+# এটি গিটহাবকে আপনার রিপোজিটরিতে ফাইল লেখার অনুমতি দেবে
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -21,27 +27,31 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      # নতুন প্যাকেজ নাম দিয়ে প্রজেক্ট রি-কনফিগার করা
-      - name: Create Flutter Project
+      # অ্যাপের নাম এবং প্যাকেজ আইডি দিয়ে প্রজেক্ট তৈরি
+      - name: Create Missing Files
         run: |
           flutter create --project-name=hishab_kitab --org=com.hishabkitab --platforms android .
-
-      # অ্যান্ড্রয়েড ৮.১ এর জন্য কম্প্যাটিবিলিটি এবং প্যাকেজ আইডি ফিক্স
-      - name: Configure Android Manifest and SDK
-        run: |
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
           sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
           sed -i 's/applicationId .*/applicationId "com.hishabkitab.app"/' android/app/build.gradle
 
+      # এই ধাপটি আপনার রিপোজিটরিতে ফাইলগুলো সেভ করে দেবে
+      - name: Save Files to Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Permanent Save: Android and Config Files Added" || echo "No changes to commit"
+          git push
+
       - name: Get Dependencies
         run: flutter pub get
 
-      # এপিকে বিল্ড করা
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Hishab-Kitab-Final
+          name: Hishab-Kitab-App
           path: build/app/outputs/flutter-apk/app-release.apk
