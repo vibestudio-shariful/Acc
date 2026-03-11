@@ -21,9 +21,8 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      # এই কমান্ডটি আপনার মিসিং ফাইলগুলো (Gradle, AndroidManifest) অটো তৈরি করবে
       - name: Create Missing Files
-        run: flutter create . --platforms android --force
+        run: flutter create . --platforms android
 
       - name: Get Packages
         run: flutter pub get
